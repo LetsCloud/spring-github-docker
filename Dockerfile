@@ -1,3 +1,10 @@
-FROM alpine:3.10
+FROM openjdk:11-jre
 ARG PROFILE
-RUN echo "Here is the build env: $PROFILE!"
+ENV PROFILE_VAR=$PROFILE
+VOLUME /tmp
+# Add the built jar for docker image building
+ADD target/spring-github-docker.jar spring-github-docker.jar
+ENTRYPOINT ["/bin/bash", "-c", "java","-Dspring.profiles.active=$PROFILE_VAR","-jar","/spring-github-docker.jar"]
+# DO NOT USE(The variable would not be substituted): ENTRYPOINT ["java","-Dspring.profiles.active=$PROFILE_VAR","-jar","/hello-world-docker-action.jar"]
+# CAN ALSO USE: ENTRYPOINT java -Dspring.profiles.active=$PROFILE_VAR -jar /hello-world-docker-action.jar
+EXPOSE 80
