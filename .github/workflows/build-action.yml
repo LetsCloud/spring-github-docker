@@ -58,7 +58,7 @@ jobs:
           token: ${{ secrets.DIGITALOCEAN_ACCESS_TOKEN }}
  
       - name: Save DigitalOcean kubeconfig with short-lived credentials
-        run: doctl kubernetes cluster kubeconfig save --expiry-seconds 600 k8s:d4a44d45-3a39-4209-b247-12175f7233c4
+        run: doctl kubernetes cluster kubeconfig save --expiry-seconds 600 do-fra1-webinar1
  
       # Deploy Angular & Spring Boot Docker image to the DigitalOcean kubernetes cluster
       - name: Deploy
