@@ -1,10 +1,8 @@
 FROM openjdk:11-jre
-ARG PROFILE
-ENV PROFILE_VAR=$PROFILE
-VOLUME /tmp
-# Add the built jar for docker image building
-ADD target/spring-github-docker-0.0.1-SNAPSHOT.jar spring-github-docker.jar
-ENTRYPOINT ["/bin/bash", "-c", "java","-jar","/spring-github-docker.jar"]
-# DO NOT USE(The variable would not be substituted): ENTRYPOINT ["java","-Dspring.profiles.active=$PROFILE_VAR","-jar","/hello-world-docker-action.jar"]
-# CAN ALSO USE: ENTRYPOINT java -Dspring.profiles.active=$PROFILE_VAR -jar /hello-world-docker-action.jar
-EXPOSE 80
+RUN addgroup -S spring && adduser -S spring -G spring
+USER spring:spring
+ARG DEPENDENCY=target/dependency
+COPY ${DEPENDENCY}/BOOT-INF/lib /app/lib
+COPY ${DEPENDENCY}/META-INF /app/META-INF
+COPY ${DEPENDENCY}/BOOT-INF/classes /app
+ENTRYPOINT ["java","-cp","app:app/lib/*","spring-github-docker"]
