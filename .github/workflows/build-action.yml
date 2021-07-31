@@ -8,6 +8,12 @@ on:
     branches:
       - master
 
+# Environment variables available to all jobs and steps in this workflow
+env:
+  SPRING_BOOT_IMAGE_NAME: spring-github-docker
+  SPRING_BOOT_CONTAINER_NAME: spring-github-docker
+  SPRING_BOOT_DEPLOYMENT_NAME: spring-github-docker
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -45,3 +51,18 @@ jobs:
           cache-to: type=inline
           tags: letscloud/spring-github-docker:latest
           build-args: PROFILE=nectar,ARG2=test
+    
+      - name: Install doctl
+        uses: digitalocean/action-doctl@v2
+        with:
+          token: ${{ secrets.DIGITALOCEAN_ACCESS_TOKEN }}
+ 
+      - name: Save DigitalOcean kubeconfig with short-lived credentials
+        run: doctl kubernetes cluster kubeconfig save --expiry-seconds 600 k8s:d4a44d45-3a39-4209-b247-12175f7233c4
+ 
+      # Deploy Angular & Spring Boot Docker image to the DigitalOcean kubernetes cluster
+      - name: Deploy
+        run: |-
+          kubectl set image deployment/${{env.SPRING_BOOT_DEPLOYMENT_NAME}} ${{ env.SPRING_BOOT_CONTAINER_NAME}}=${{ secrets.DOCKER_HUB_USERNAME }}/${{ env.SPRING_BOOT_IMAGE_NAME }}:${{ github.sha }}
+          kubectl rollout status deployment/${{env.SPRING_BOOT_DEPLOYMENT_NAME}}
+          kubectl get services -o wide
