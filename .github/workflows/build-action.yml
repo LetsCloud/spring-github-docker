@@ -63,6 +63,6 @@ jobs:
       # Deploy Angular & Spring Boot Docker image to the DigitalOcean kubernetes cluster
       - name: Deploy
         run: |-
-          kubectl set image deployment/${{env.SPRING_BOOT_DEPLOYMENT_NAME}} ${{ env.SPRING_BOOT_CONTAINER_NAME}}=${{ secrets.DOCKER_HUB_USERNAME }}/${{ env.SPRING_BOOT_IMAGE_NAME }}:${{ github.sha }}
+          kubectl set image deployment/${{env.SPRING_BOOT_DEPLOYMENT_NAME}} ${{ env.SPRING_BOOT_CONTAINER_NAME}}=${{ secrets.DOCKER_HUB_USER }}/${{ env.SPRING_BOOT_IMAGE_NAME }}:${{ github.sha }}
           kubectl rollout status deployment/${{env.SPRING_BOOT_DEPLOYMENT_NAME}}
           kubectl get services -o wide
