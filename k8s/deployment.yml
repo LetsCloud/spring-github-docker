@@ -29,6 +29,6 @@ spec:
   selector:
     app: spring-github-docker
   ports:
-  - name: TCP
+  - name: http
     port: 8080
     targetPort: 8080
