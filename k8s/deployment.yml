@@ -9,11 +9,6 @@ spec:
   selector:
     matchLabels:
       app: spring-github-docker
-  strategy:
-    rollingUpdate:
-      maxSurge: 1
-      maxUnavailable: 1
-  minReadySeconds: 5
   template:
     metadata:
       labels:
@@ -28,12 +23,12 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: spring-github-docker-service
+  name: spring-github-docker
 spec:
   type: LoadBalancer
-  ports:
-  - name: http
-    port: 8080
-    targetPort: 8080
   selector:
     app: spring-github-docker
+  ports:
+  - name: TCP
+    port: 8080
+    targetPort: 8080
