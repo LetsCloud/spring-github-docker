@@ -30,39 +30,29 @@ jobs:
 
       - name: Build with Maven
         run: mvn clean package -Dmaven.test.skip=true
-      
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v1
-
-      - name: Login to DockerHub
-        uses: docker/login-action@v1
-        with:
-          username: ${{ secrets.DOCKER_HUB_USER }}
-          password: ${{ secrets.DOCKER_HUB_PASS }}
-
-      - name: Build and push
-        uses: docker/build-push-action@v2
-        with:
-          context: ./
-          file: ./Dockerfile
-          pull: true
-          push: true
-          cache-from: type=registry,ref=letscloud/spring-github-docker:latest
-          cache-to: type=inline
-          tags: letscloud/spring-github-docker:latest
-          build-args: PROFILE=nectar,ARG2=test
     
+      - name: Build container image
+      run: docker build -t registry.digitalocean.com/dev-container/spring-github-docker:$(echo $GITHUB_SHA | head -c7) .
+          
       - name: Install doctl
         uses: digitalocean/action-doctl@v2
         with:
           token: ${{ secrets.DIGITALOCEAN_ACCESS_TOKEN }}
  
+      - name: Log in to DigitalOcean Container Registry with short-lived credentials
+        run: doctl registry login --expiry-seconds 600
+
+      - name: Push image to DigitalOcean Container Registry
+        run: docker push registry.digitalocean.com/dev-container/spring-github-docker:$(echo $GITHUB_SHA | head -c7)
+        
+      - name: Update deployment file
+        run: TAG=$(echo $GITHUB_SHA | head -c7) && sed -i 's|<IMAGE>|registry.digitalocean.com/dev-container/spring-github-docker:'${TAG}'|' $GITHUB_WORKSPACE/k8s/deployment.yml
+
       - name: Save DigitalOcean kubeconfig with short-lived credentials
         run: doctl kubernetes cluster kubeconfig save --expiry-seconds 600 d4a44d45-3a39-4209-b247-12175f7233c4
- 
-      # Deploy Angular & Spring Boot Docker image to the DigitalOcean kubernetes cluster
-      - name: Deploy
-        run: |-
-          kubectl set image deployment/spring-github-docker spring-github-docker=letscloud/spring-github-docker:${{ github.sha }}
-          kubectl rollout status deployment/spring-github-docker
-          kubectl get services -o wide
+
+      - name: Deploy to DigitalOcean Kubernetes
+        run: kubectl apply -f $GITHUB_WORKSPACE/k8s/deployment.yml
+
+      - name: Verify deployment
+        run: kubectl rollout status deployment/spring-github-docker
