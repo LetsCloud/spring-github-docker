@@ -23,29 +23,17 @@ spec:
       - name: spring-github-docker
         image: <IMAGE>
         ports:
-        - containerPort: 5000
-        resources:
-          requests:
-            cpu: 100m
-          limits:
-            cpu: 100m
-      imagePullSecrets:
-      - name: asb
+        - containerPort: 8080
 ---
 apiVersion: v1
 kind: Service
 metadata:
   name: spring-github-docker-service
-  annotations:
-    external-dns.alpha.kubernetes.io/hostname: "doctl-action.do-api.dev"
-    service.beta.kubernetes.io/do-loadbalancer-certificate-id: "55db8c92-be68-4388-ba86-c18339da5847"
-    service.beta.kubernetes.io/do-loadbalancer-redirect-http-to-https: "true"
 spec:
   type: LoadBalancer
   ports:
-    - name: https
-      protocol: TCP
-      port: 443
-      targetPort: 5000
+  - name: http
+    port: 8080
+    targetPort: 8080
   selector:
     app: spring-github-docker
