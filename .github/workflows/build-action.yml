@@ -32,7 +32,7 @@ jobs:
         run: mvn clean package -Dmaven.test.skip=true
     
       - name: Build container image
-      run: docker build -t registry.digitalocean.com/dev-container/spring-github-docker:$(echo $GITHUB_SHA | head -c7) .
+        run: docker build -t registry.digitalocean.com/dev-container/spring-github-docker:$(echo $GITHUB_SHA | head -c7) .
           
       - name: Install doctl
         uses: digitalocean/action-doctl@v2
